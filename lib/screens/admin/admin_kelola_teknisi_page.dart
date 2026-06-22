@@ -3,16 +3,17 @@ import '../../core/theme/app_theme.dart';
 import '../../models/teknisi_model.dart';
 import '../../services/data_service.dart';
 
-class AdminKelolaTeknisiPage extends StatefulWidget {
-  const AdminKelolaTeknisiPage({super.key});
+class TeknisiPage extends StatefulWidget {
+  const TeknisiPage({super.key});
 
   @override
-  State<AdminKelolaTeknisiPage> createState() => _AdminKelolaTeknisiPageState();
+  State<TeknisiPage> createState() => _TeknisiPageState();
 }
 
-class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
+class _TeknisiPageState extends State<TeknisiPage> {
   late List<Teknisi> _teknisiList;
   String _searchQuery = '';
+  String? _selectedWorkload;
   final _searchCtrl = TextEditingController();
 
   @override
@@ -31,11 +32,15 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
   }
 
   List<Teknisi> get _filtered => _teknisiList.where((t) {
-        return _searchQuery.isEmpty ||
-            t.name.toLowerCase().contains(_searchQuery) ||
-            t.specialization.toLowerCase().contains(_searchQuery) ||
-            t.division.toLowerCase().contains(_searchQuery);
-      }).toList();
+    final matchesSearch =
+        _searchQuery.isEmpty ||
+        t.name.toLowerCase().contains(_searchQuery) ||
+        t.specialization.toLowerCase().contains(_searchQuery) ||
+        t.division.toLowerCase().contains(_searchQuery);
+    final matchesWorkload =
+        _selectedWorkload == null || t.workloadStatus == _selectedWorkload;
+    return matchesSearch && matchesWorkload;
+  }).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +49,7 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
         children: [
           _buildHeader(),
           _buildSearchBar(),
-          _buildSummaryRow(),
+          _buildFilterRow(),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -71,20 +76,20 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
           const Text(
             'Kelola Teknisi',
             style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold),
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const Spacer(),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '${_teknisiList.length} teknisi',
+              '${_teknisiList.length} Teknisi',
               style: const TextStyle(color: Colors.white, fontSize: 12),
             ),
           ),
@@ -100,10 +105,15 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
         controller: _searchCtrl,
         decoration: InputDecoration(
           hintText: 'Cari teknisi atau divisi...',
-          hintStyle:
-              const TextStyle(fontSize: 13, color: AppPalette.textSecondary),
-          prefixIcon: const Icon(Icons.search,
-              size: 20, color: AppPalette.textSecondary),
+          hintStyle: const TextStyle(
+            fontSize: 13,
+            color: AppPalette.textSecondary,
+          ),
+          prefixIcon: const Icon(
+            Icons.search,
+            size: 20,
+            color: AppPalette.textSecondary,
+          ),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.clear, size: 18),
@@ -112,8 +122,10 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
               : null,
           filled: true,
           fillColor: const Color(0xFFF0F3FA),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 10,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -123,27 +135,57 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
     );
   }
 
-  Widget _buildSummaryRow() {
-    final ringan =
-        _teknisiList.where((t) => t.workloadStatus == 'Ringan').length;
-    final sedang =
-        _teknisiList.where((t) => t.workloadStatus == 'Sedang').length;
-    final overload =
-        _teknisiList.where((t) => t.workloadStatus == 'Overload').length;
+  Widget _buildFilterRow() {
+    final ringan = _teknisiList
+        .where((t) => t.workloadStatus == 'Ringan')
+        .length;
+    final sedang = _teknisiList
+        .where((t) => t.workloadStatus == 'Sedang')
+        .length;
+    final overload = _teknisiList
+        .where((t) => t.workloadStatus == 'Overload')
+        .length;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          _WorkloadChip(label: 'Ringan', count: ringan, color: Colors.green),
-          const SizedBox(width: 8),
-          _WorkloadChip(label: 'Sedang', count: sedang, color: Colors.orange),
+          _WorkloadChip(
+            label: 'Ringan',
+            count: ringan,
+            color: Colors.green,
+            selected: _selectedWorkload == 'Ringan',
+            onTap: () => _toggleWorkloadFilter('Ringan'),
+          ),
           const SizedBox(width: 8),
           _WorkloadChip(
-              label: 'Overload', count: overload, color: Colors.red),
+            label: 'Sedang',
+            count: sedang,
+            color: Colors.orange,
+            selected: _selectedWorkload == 'Sedang',
+            onTap: () => _toggleWorkloadFilter('Sedang'),
+          ),
+          const SizedBox(width: 8),
+          _WorkloadChip(
+            label: 'Overload',
+            count: overload,
+            color: Colors.red,
+            selected: _selectedWorkload == 'Overload',
+            onTap: () => _toggleWorkloadFilter('Overload'),
+          ),
         ],
       ),
     );
+  }
+
+  void _toggleWorkloadFilter(String status) {
+    setState(() {
+      if (_selectedWorkload == status) {
+        _selectedWorkload = null;
+      } else {
+        _selectedWorkload = status;
+      }
+    });
   }
 
   void _showTeknisiDetail(Teknisi teknisi) {
@@ -178,14 +220,14 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor:
-                        AppPalette.primary.withOpacity(0.12),
+                    backgroundColor: AppPalette.primary.withOpacity(0.12),
                     child: Text(
                       teknisi.name.substring(0, 1),
                       style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AppPalette.primary),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppPalette.primary,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -193,24 +235,35 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(teknisi.name,
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold)),
-                        Text(teknisi.specialization,
-                            style: const TextStyle(
-                                fontSize: 13,
-                                color: AppPalette.textSecondary)),
-                        Text(teknisi.division,
-                            style: const TextStyle(
-                                fontSize: 12,
-                                color: AppPalette.textSecondary)),
+                        Text(
+                          teknisi.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          teknisi.specialization,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppPalette.textSecondary,
+                          ),
+                        ),
+                        Text(
+                          teknisi.division,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppPalette.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: teknisi.workloadColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
@@ -218,9 +271,10 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
                     child: Text(
                       teknisi.workloadStatus,
                       style: TextStyle(
-                          color: teknisi.workloadColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12),
+                        color: teknisi.workloadColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -231,24 +285,28 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
               _detailRow(Icons.email_outlined, 'Email', teknisi.email),
               _detailRow(Icons.phone_outlined, 'Telepon', teknisi.phone),
               _detailRow(Icons.work_outline, 'Divisi', teknisi.division),
-              _detailRow(Icons.confirmation_number_outlined,
-                  'Tiket Aktif', '${teknisi.activeTickets} tiket'),
+              _detailRow(
+                Icons.confirmation_number_outlined,
+                'Tiket Aktif',
+                '${teknisi.activeTickets} tiket',
+              ),
               const SizedBox(height: 16),
-              const Text('Keahlian',
-                  style: TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.bold)),
+              const Text(
+                'Keahlian',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: teknisi.skills
-                    .map((s) => Chip(
-                          label: Text(s,
-                              style: const TextStyle(fontSize: 12)),
-                          backgroundColor:
-                              AppPalette.primary.withOpacity(0.08),
-                          side: BorderSide.none,
-                        ))
+                    .map(
+                      (s) => Chip(
+                        label: Text(s, style: const TextStyle(fontSize: 12)),
+                        backgroundColor: AppPalette.primary.withOpacity(0.08),
+                        side: BorderSide.none,
+                      ),
+                    )
                     .toList(),
               ),
             ],
@@ -265,13 +323,18 @@ class _AdminKelolaTeknisiPageState extends State<AdminKelolaTeknisiPage> {
         children: [
           Icon(icon, size: 18, color: AppPalette.primary),
           const SizedBox(width: 10),
-          Text('$label: ',
-              style: const TextStyle(
-                  fontSize: 13, color: AppPalette.textSecondary)),
+          Text(
+            '$label: ',
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppPalette.textSecondary,
+            ),
+          ),
           Expanded(
-            child: Text(value,
-                style: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w500)),
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            ),
           ),
         ],
       ),
@@ -284,37 +347,58 @@ class _WorkloadChip extends StatelessWidget {
   final String label;
   final int count;
   final Color color;
+  final bool selected;
+  final VoidCallback? onTap;
 
-  const _WorkloadChip(
-      {required this.label, required this.count, required this.color});
+  const _WorkloadChip({
+    required this.label,
+    required this.count,
+    required this.color,
+    this.selected = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? color.withOpacity(0.18) : color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? color.withOpacity(0.45) : color.withOpacity(0.3),
+          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: color.withOpacity(0.12),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            '$label: $count',
-            style: TextStyle(
-                fontSize: 11, color: color, fontWeight: FontWeight.w600),
-          ),
-        ],
+            const SizedBox(width: 6),
+            Text(
+              '$label: $count',
+              style: TextStyle(
+                fontSize: 11,
+                color: selected ? Colors.black : color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -354,9 +438,10 @@ class _TeknisiCard extends StatelessWidget {
               child: Text(
                 teknisi.name.substring(0, 1),
                 style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppPalette.primary),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppPalette.primary,
+                ),
               ),
             ),
             const SizedBox(width: 14),
@@ -364,32 +449,50 @@ class _TeknisiCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(teknisi.name,
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text(
+                    teknisi.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(teknisi.specialization,
-                      style: const TextStyle(
-                          fontSize: 12, color: AppPalette.textSecondary)),
+                  Text(
+                    teknisi.specialization,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppPalette.textSecondary,
+                    ),
+                  ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.confirmation_number_outlined,
-                          size: 12, color: AppPalette.textSecondary),
+                      const Icon(
+                        Icons.confirmation_number_outlined,
+                        size: 12,
+                        color: AppPalette.textSecondary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${teknisi.activeTickets} tiket aktif',
                         style: const TextStyle(
-                            fontSize: 11, color: AppPalette.textSecondary),
+                          fontSize: 11,
+                          color: AppPalette.textSecondary,
+                        ),
                       ),
                       const SizedBox(width: 10),
-                      const Icon(Icons.business_outlined,
-                          size: 12, color: AppPalette.textSecondary),
+                      const Icon(
+                        Icons.business_outlined,
+                        size: 12,
+                        color: AppPalette.textSecondary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         teknisi.division,
                         style: const TextStyle(
-                            fontSize: 11, color: AppPalette.textSecondary),
+                          fontSize: 11,
+                          color: AppPalette.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -400,24 +503,29 @@ class _TeknisiCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color:
-                        teknisi.workloadColor.withOpacity(0.1),
+                    color: teknisi.workloadColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     teknisi.workloadStatus,
                     style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: teknisi.workloadColor),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: teknisi.workloadColor,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Icon(Icons.chevron_right,
-                    color: AppPalette.textSecondary, size: 18),
+                const Icon(
+                  Icons.chevron_right,
+                  color: AppPalette.textSecondary,
+                  size: 18,
+                ),
               ],
             ),
           ],

@@ -9,6 +9,7 @@ class Teknisi {
   final int activeTickets;
   final List<String> skills;
   final String division;
+  final String? workloadStatusOverride;
 
   Teknisi({
     required this.id,
@@ -19,17 +20,20 @@ class Teknisi {
     required this.activeTickets,
     required this.skills,
     required this.division,
+    this.workloadStatusOverride,
   });
 
   String get workloadStatus {
+    if (workloadStatusOverride != null) return workloadStatusOverride!;
     if (activeTickets <= 2) return 'Ringan';
     if (activeTickets <= 4) return 'Sedang';
     return 'Overload';
   }
 
   Color get workloadColor {
-    if (activeTickets <= 2) return Colors.green;
-    if (activeTickets <= 4) return Colors.orange;
+    final status = workloadStatus;
+    if (status == 'Ringan') return Colors.green;
+    if (status == 'Sedang') return Colors.orange;
     return Colors.red;
   }
 
@@ -42,6 +46,7 @@ class Teknisi {
     int? activeTickets,
     List<String>? skills,
     String? division,
+    String? workloadStatusOverride,
   }) {
     return Teknisi(
       id: id ?? this.id,
@@ -52,6 +57,8 @@ class Teknisi {
       activeTickets: activeTickets ?? this.activeTickets,
       skills: skills ?? this.skills,
       division: division ?? this.division,
+      workloadStatusOverride:
+          workloadStatusOverride ?? this.workloadStatusOverride,
     );
   }
 }

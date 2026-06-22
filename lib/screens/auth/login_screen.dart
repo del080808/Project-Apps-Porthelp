@@ -31,6 +31,17 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_updateFormState);
+    _passwordController.addListener(_updateFormState);
+  }
+
+  void _updateFormState() {
+    if (mounted) setState(() {});
+  }
+
   final Map<String, Map<String, dynamic>> _roles = {
     'User (Pelapor)': {
       'code': 'user',
@@ -64,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool get _isFormValid {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-    return email.isNotEmpty && password.isNotEmpty;
+    return email.length >= 8 && password.length >= 8;
   }
 
   @override

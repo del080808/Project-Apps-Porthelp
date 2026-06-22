@@ -34,7 +34,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       onNavigate: (index) => setState(() => _selectedIndex = index),
     ),
     const AdminSemuaTiketPage(),
-    const AdminKelolaTeknisiPage(),
+    const TeknisiPage(),
     const AdminNotifikasiPage(),
     AdminProfilPage(user: widget.user),
   ];
@@ -73,8 +73,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
               label: 'Semua Tiket',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.engineering_outlined),
-              activeIcon: Icon(Icons.engineering),
+              icon: Icon(Icons.settings_outlined),
+              activeIcon: Icon(Icons.settings),
               label: 'Teknisi',
             ),
             BottomNavigationBarItem(
@@ -243,7 +243,11 @@ class _HomePageState extends State<_HomePage> {
               const SizedBox(width: 12),
               _buildHeaderStat('Terbuka', '$_openTickets', Icons.fiber_new),
               const SizedBox(width: 12),
-              _buildHeaderStat('Overdue', '$_overdueTickets', Icons.warning_amber),
+              _buildHeaderStat(
+                'Overdue',
+                '$_overdueTickets',
+                Icons.warning_amber,
+              ),
             ],
           ),
         ],
