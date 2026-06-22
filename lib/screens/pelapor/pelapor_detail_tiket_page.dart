@@ -60,7 +60,7 @@ class _PelaporDetailTiketPageState extends State<PelaporDetailTiketPage> {
 
   String _getEstimasi() {
     switch (_ticket.priority.toLowerCase()) {
-      case 'critical':
+      case 'urgent':
         return '4 jam kerja';
       case 'high':
         return '1 hari kerja';
@@ -119,7 +119,7 @@ class _PelaporDetailTiketPageState extends State<PelaporDetailTiketPage> {
 
   Color _getPriorityColor() {
     switch (_ticket.priority.toLowerCase()) {
-      case 'critical':
+      case 'urgent':
         return Colors.red;
       case 'high':
         return Colors.orange;

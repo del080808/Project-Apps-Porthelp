@@ -14,7 +14,7 @@ class PelaporTicketCard extends StatelessWidget {
 
   Color _getPriorityColor() {
     switch (ticket.priority.toLowerCase()) {
-      case 'Critical':
+      case 'urgent':
         return Colors.red;
       case 'high':
         return Colors.orange;
@@ -55,10 +55,14 @@ class PelaporTicketCard extends StatelessWidget {
         title.contains('mouse')) {
       return 'Hardware';
     }
-    if (title.contains('internet') || title.contains('koneksi') || title.contains('wifi')) {
+    if (title.contains('internet') ||
+        title.contains('koneksi') ||
+        title.contains('wifi')) {
       return 'Network';
     }
-    if (title.contains('ac') || title.contains('listrik') || title.contains('lampu')) {
+    if (title.contains('ac') ||
+        title.contains('listrik') ||
+        title.contains('lampu')) {
       return 'Fasilitas';
     }
     return 'Software';

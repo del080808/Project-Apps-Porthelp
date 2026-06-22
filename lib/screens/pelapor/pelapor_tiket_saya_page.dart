@@ -21,7 +21,11 @@ class _PelaporTiketSayaPageState extends State<PelaporTiketSayaPage> {
   // Default: 'Terbaru' — tiket paling baru tampil duluan
   // ──────────────────────────────────────────────────
   String _sortBy = 'Terbaru';
-  final List<String> _sortOptions = ['Terbaru', 'Terlama', 'Prioritas Tertinggi'];
+  final List<String> _sortOptions = [
+    'Terbaru',
+    'Terlama',
+    'Prioritas Tertinggi',
+  ];
 
   // ──────────────────────────────────────────────────
   // PERBAIKAN 1: Tambah controller untuk search bar
@@ -52,9 +56,9 @@ class _PelaporTiketSayaPageState extends State<PelaporTiketSayaPage> {
     final filtered = tickets.where((ticket) {
       final matchesSearch =
           ticket.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          ticket.description
-              .toLowerCase()
-              .contains(_searchQuery.toLowerCase()) ||
+          ticket.description.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ) ||
           ticket.id.toLowerCase().contains(_searchQuery.toLowerCase());
 
       final matchesStatus =
@@ -70,16 +74,12 @@ class _PelaporTiketSayaPageState extends State<PelaporTiketSayaPage> {
         filtered.sort((a, b) => a.date.compareTo(b.date));
         break;
       case 'Prioritas Tertinggi':
-        // Critical=0, High=1, Medium=2, Low=3 (makin kecil = makin tinggi)
-        const priorityOrder = {
-          'Critical': 0,
-          'High': 1,
-          'Medium': 2,
-          'Low': 3,
-        };
+        // Urgent=0, High=1, Medium=2, Low=3 (makin kecil = makin tinggi)
+        const priorityOrder = {'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3};
         filtered.sort(
-          (a, b) => (priorityOrder[a.priority] ?? 9)
-              .compareTo(priorityOrder[b.priority] ?? 9),
+          (a, b) => (priorityOrder[a.priority] ?? 9).compareTo(
+            priorityOrder[b.priority] ?? 9,
+          ),
         );
         break;
       case 'Terbaru':
@@ -245,10 +245,8 @@ class _PelaporTiketSayaPageState extends State<PelaporTiketSayaPage> {
                           ),
                           items: _sortOptions
                               .map(
-                                (s) => DropdownMenuItem(
-                                  value: s,
-                                  child: Text(s),
-                                ),
+                                (s) =>
+                                    DropdownMenuItem(value: s, child: Text(s)),
                               )
                               .toList(),
                           onChanged: (v) {

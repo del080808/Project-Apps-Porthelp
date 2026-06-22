@@ -15,25 +15,84 @@ class BuatTiketPage extends StatefulWidget {
 }
 
 class _BuatTiketPageState extends State<BuatTiketPage> {
-  String _category = 'Hardware';
-  String _priority = 'Medium';
+  String? _category;
+  String? _priority;
+  String? _subCategory;
+  final _otherController = TextEditingController();
+  String? _otherImpact;
   final _locationController = TextEditingController();
   final _assetController = TextEditingController();
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   File? _pickedFile;
 
-  final _categories = ['Hardware', 'Software', 'Network', 'Lainnya'];
-  final _priorities = ['Low', 'Medium', 'High', 'Critical'];
+  final _categories = [
+    'Hardware (perangkat computer)',
+    'Software (aplikasi dan system)',
+    'Network (internet dan jaringan)',
+    'Lainnya (permintaan lainnya)',
+  ];
 
   final Map<String, List<String>> _subCategoryMap = {
-    'Hardware': ['Laptop / Desktop', 'Printer', 'Monitor', 'Keyboard / Mouse'],
-    'Software': ['Antivirus', 'Office', 'OS', 'Aplikasi Lainnya'],
-    'Network': ['WiFi', 'LAN', 'VPN', 'Internet'],
-    'Lainnya': ['Lainnya'],
+    'Hardware (perangkat computer)': [
+      'Keyboard / Mouse rusak',
+      'Monitor bermasalah',
+      'Printer bermasalah',
+      'Scanner bermasalah',
+      'Laptop/Desktop lambat',
+      'Laptop/Desktop tidak menyala',
+      'Laptop/Desktop mati total saat operasional',
+    ],
+    'Software (aplikasi dan system)': [
+      'Lupa password',
+      'Permintaan instal aplikasi',
+      'Error aplikasi ringan',
+      'Tidak bisa login aplikasi',
+      'Aplikasi sering crash',
+      'Sistem utama tidak dapat digunakan',
+    ],
+    'Network (internet dan jaringan)': [
+      'Internet lambat',
+      'WiFi tidak tersambung',
+      'Tidak bisa akses folder sharing',
+      'Tidak bisa akses server',
+      'Jaringan satu ruangan mati',
+      'Jaringan satu divisi mati',
+      'Internet kantor mati total',
+    ],
+    'Lainnya (permintaan lainnya)': ['Lainnya'],
   };
 
-  late String _subCategory = _subCategoryMap[_category]!.first;
+  final Map<String, String> _defaultPriorityBySubCategory = {
+    'Keyboard / Mouse rusak': 'Low',
+    'Monitor bermasalah': 'Medium',
+    'Printer bermasalah': 'Medium',
+    'Scanner bermasalah': 'Medium',
+    'Laptop/Desktop lambat': 'Medium',
+    'Laptop/Desktop tidak menyala': 'High',
+    'Laptop/Desktop mati total saat operasional': 'Urgent',
+    'Lupa password': 'Low',
+    'Permintaan instal aplikasi': 'Low',
+    'Error aplikasi ringan': 'Medium',
+    'Tidak bisa login aplikasi': 'Medium',
+    'Aplikasi sering crash': 'High',
+    'Sistem utama tidak dapat digunakan': 'Urgent',
+    'Internet lambat': 'Medium',
+    'WiFi tidak tersambung': 'Medium',
+    'Tidak bisa akses folder sharing': 'High',
+    'Tidak bisa akses server': 'High',
+    'Jaringan satu ruangan mati': 'High',
+    'Jaringan satu divisi mati': 'Urgent',
+    'Internet kantor mati total': 'Urgent',
+    'Lainnya': 'Low',
+  };
+
+  final Map<String, String> _impactToPriority = {
+    'Hanya saya yang terdampak': 'Low',
+    'Beberapa rekan kerja terdampak': 'Medium',
+    'Satu divisi terdampak': 'High',
+    'Operasional berhenti': 'Urgent',
+  };
 
   @override
   void dispose() {
@@ -41,6 +100,7 @@ class _BuatTiketPageState extends State<BuatTiketPage> {
     _assetController.dispose();
     _titleController.dispose();
     _descController.dispose();
+    _otherController.dispose();
     super.dispose();
   }
 
@@ -50,9 +110,11 @@ class _BuatTiketPageState extends State<BuatTiketPage> {
     _assetController.clear();
     _descController.clear();
     setState(() {
-      _category = 'Hardware';
-      _subCategory = _subCategoryMap['Hardware']!.first;
-      _priority = 'Medium';
+      _category = null;
+      _subCategory = null;
+      _priority = null;
+      _otherController.clear();
+      _otherImpact = null;
       _pickedFile = null;
     });
   }
@@ -147,6 +209,28 @@ class _BuatTiketPageState extends State<BuatTiketPage> {
   }
 
   void _submit() {
+    if (_category == null) {
+      _showValidationSnackBar('Kategori harus dipilih');
+      return;
+    }
+    if (_category == 'Lainnya (permintaan lainnya)') {
+      if (_otherController.text.trim().isEmpty) {
+        _showValidationSnackBar('Silakan jelaskan masalah pada bagian Lainnya');
+        return;
+      }
+      if (_otherImpact == null) {
+        _showValidationSnackBar('Pilih besaran dampak masalah');
+        return;
+      }
+      // set subcategory and priority from free-text and impact
+      _subCategory = _otherController.text.trim();
+      _priority = _impactToPriority[_otherImpact] ?? 'Medium';
+    } else {
+      if (_subCategory == null) {
+        _showValidationSnackBar('Sub-kategori harus dipilih');
+        return;
+      }
+    }
     if (_titleController.text.trim().isEmpty) {
       _showValidationSnackBar('Judul tiket tidak boleh kosong');
       return;
@@ -165,7 +249,7 @@ class _BuatTiketPageState extends State<BuatTiketPage> {
       title: _titleController.text.trim(),
       description:
           'Kategori: $_category | Sub-kategori: $_subCategory | Lokasi: ${_locationController.text.trim()} | Aset: ${_assetController.text.trim()}\n\n${_descController.text.trim()}',
-      priority: _priority,
+      priority: _priority ?? 'Medium',
       status: 'Terbuka',
       date: DateTime.now().toIso8601String().split('T').first,
       assignedTo: null,
@@ -245,7 +329,9 @@ class _BuatTiketPageState extends State<BuatTiketPage> {
 
   @override
   Widget build(BuildContext context) {
-    final activeSubCategories = _subCategoryMap[_category]!;
+    final activeSubCategories = _category == null
+        ? const <String>[]
+        : _subCategoryMap[_category]!;
 
     return Scaffold(
       backgroundColor: AppPalette.background,
@@ -276,68 +362,133 @@ class _BuatTiketPageState extends State<BuatTiketPage> {
               if (v == null) return;
               setState(() {
                 _category = v;
-                _subCategory = _subCategoryMap[v]!.first;
+                _subCategory = null;
+                _priority = null;
               });
-            }),
+            }, hint: 'Pilih kategori'),
             const SizedBox(height: 12),
 
             _label('Sub-kategori'),
-            _dropdown(
-              _subCategory,
-              activeSubCategories,
-              (v) => setState(() => _subCategory = v!),
-            ),
+            if (_category == 'Lainnya (permintaan lainnya)') ...[
+              Text(
+                'Apa yang ingin Anda laporkan?',
+                style: TextStyle(color: AppPalette.textSecondary),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _otherController,
+                decoration: InputDecoration(
+                  hintText: 'Tulis masalah Anda di sini',
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: AppPalette.border),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Seberapa besar dampak masalah ini?',
+                style: TextStyle(fontSize: 14, color: AppPalette.textSecondary),
+              ),
+              const SizedBox(height: 8),
+              Column(
+                children: _impactToPriority.keys.map((label) {
+                  return RadioListTile<String>(
+                    dense: true,
+                    title: Text(label),
+                    value: label,
+                    groupValue: _otherImpact,
+                    onChanged: (v) => setState(() {
+                      _otherImpact = v;
+                      _priority = _impactToPriority[v!] ?? 'Medium';
+                    }),
+                  );
+                }).toList(),
+              ),
+            ] else ...[
+              _dropdown(
+                _subCategory,
+                activeSubCategories,
+                activeSubCategories.isEmpty
+                    ? null
+                    : (v) => setState(() {
+                        _subCategory = v!;
+                        _priority =
+                            _defaultPriorityBySubCategory[_subCategory] ??
+                            'Medium';
+                      }),
+                hint: _category == null
+                    ? 'Pilih kategori terlebih dahulu'
+                    : 'Pilih sub-kategori',
+              ),
+            ],
             const SizedBox(height: 16),
 
             _label('Tingkat Prioritas'),
-            Row(
-              children: _priorities.map((p) {
-                final selected = _priority == p;
-                Color color = Colors.blue;
-                if (p == 'High') color = Colors.orange;
-                if (p == 'Critical') color = Colors.red;
-                if (p == 'Low') color = Colors.green;
-
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: GestureDetector(
-                      onTap: () => setState(() => _priority = p),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: selected ? color : AppPalette.surface,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: selected ? color : AppPalette.border,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            p,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: selected
-                                  ? Colors.white
-                                  : AppPalette.textSecondary,
-                            ),
-                          ),
-                        ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              decoration: BoxDecoration(
+                color: AppPalette.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppPalette.border),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _priority ?? 'Belum ditentukan',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: _priority == 'Urgent'
+                            ? Colors.red
+                            : _priority == 'High'
+                            ? Colors.orange
+                            : _priority == 'Medium'
+                            ? Colors.blue
+                            : _priority == 'Low'
+                            ? Colors.green
+                            : Colors.grey,
                       ),
                     ),
                   ),
-                );
-              }).toList(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppPalette.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      'Otomatis',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppPalette.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Prioritas ditentukan otomatis berdasarkan kategori dan sub-kategori.',
+              style: TextStyle(fontSize: 12, color: AppPalette.textSecondary),
             ),
             const SizedBox(height: 16),
 
-            _label('Lokasi / Kantor *'),
+            _label('Lantai *'),
             _textField(_locationController, 'Contoh: Lantai 4, Meja 412'),
-            const SizedBox(height: 12),
-
-            _label('Nomor Aset'),
-            _textField(_assetController, 'Contoh: ASSET-9921'),
             const SizedBox(height: 12),
 
             _label('Judul Masalah *'),
@@ -559,12 +710,14 @@ class _BuatTiketPageState extends State<BuatTiketPage> {
   );
 
   Widget _dropdown(
-    String value,
+    String? value,
     List<String> items,
-    ValueChanged<String?> onChanged,
-  ) => DropdownButtonFormField<String>(
-    initialValue: value, // ← fix deprecated
+    ValueChanged<String?>? onChanged, {
+    String? hint,
+  }) => DropdownButtonFormField<String>(
+    initialValue: value,
     onChanged: onChanged,
+    hint: hint != null ? Text(hint) : null,
     decoration: InputDecoration(
       filled: true,
       fillColor: Colors.white,
