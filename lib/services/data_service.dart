@@ -29,51 +29,51 @@ class DataService {
     AppNotification(
       id: 'N001',
       type: 'status_update',
-      title: 'Ticket Status Updated',
+      title: 'Status Tiket Diperbarui',
       message:
-          'Your request #TKT-001 "Printer Kantor Tidak Bisa Digunakan" has been moved to In Progress.',
-      time: '2m ago',
+          'Permintaan Anda #TKT-001 "Printer Kantor Tidak Bisa Digunakan" telah dipindahkan ke Sedang Dikerjakan.',
+      time: '2 menit lalu',
       isRead: false,
       ticketId: 'TKT-001',
     ),
     AppNotification(
       id: 'N002',
       type: 'comment',
-      title: 'New Comment',
+      title: 'Komentar Baru',
       message:
-          'Teknisi Andi added a note to your ticket: "Sedang dicek komponen printer, mohon tunggu."',
-      time: '45m ago',
+          'Teknisi Andi menambahkan catatan ke tiket Anda: "Sedang dicek komponen printer, mohon tunggu."',
+      time: '45 menit lalu',
       isRead: false,
       ticketId: 'TKT-001',
-      actionLabel: 'Reply',
+      actionLabel: 'Balas',
     ),
     AppNotification(
       id: 'N003',
       type: 'assigned',
-      title: 'Technician Assigned',
+      title: 'Teknisi Ditugaskan',
       message:
-          'Teknisi Budi has been assigned to your hardware request #TKT-002.',
-      time: '2h ago',
+          'Teknisi Budi telah ditugaskan ke permintaan hardware Anda #TKT-002.',
+      time: '2 jam lalu',
       isRead: false,
       ticketId: 'TKT-002',
     ),
     AppNotification(
       id: 'N004',
       type: 'resolved',
-      title: 'Ticket Resolved',
+      title: 'Tiket Diselesaikan',
       message:
-          'The reported issue "Komputer Tidak Bisa Menyala" has been marked as resolved. Please provide feedback.',
-      time: 'Yesterday',
+          'Masalah yang dilaporkan "Komputer Tidak Bisa Menyala" telah ditandai sebagai diselesaikan. Silakan berikan umpan balik.',
+      time: 'Kemarin',
       isRead: true,
       ticketId: 'TKT-004',
     ),
     AppNotification(
       id: 'N005',
       type: 'maintenance',
-      title: 'Scheduled Maintenance',
+      title: 'Pemeliharaan Terjadwal',
       message:
-          'Server aplikasi akan offline untuk maintenance hari Minggu pukul 02.00-04.00 WIB.',
-      time: 'Yesterday',
+          'Server aplikasi akan offline untuk pemeliharaan hari Minggu pukul 02.00-04.00 WIB.',
+      time: 'Kemarin',
       isRead: true,
     ),
   ];
@@ -521,10 +521,16 @@ class DataService {
         isOverdue: true,
       ),
     ]);
-    for (final t in list) {
+    // Normalize priorities to follow the same mapping used in the ticket form.
+    final normalized = list.map((t) {
+      final p = _priorityForTicket(t);
+      return t.priority == p ? t : t.copyWith(priority: p);
+    }).toList();
+
+    for (final t in normalized) {
       _ticketStore.putIfAbsent(t.id, () => t);
     }
-    return list;
+    return normalized;
   }
 
   // Sample Tickets untuk Teknisi (Andi Wijaya)
@@ -619,6 +625,59 @@ class DataService {
       _ticketStore.putIfAbsent(t.id, () => t);
     }
     return list;
+  }
+
+  // Priority mapping used by ticket creation form (kept here so samples stay consistent)
+  static final Map<String, String> _defaultPriorityBySubCategory = {
+    'Keyboard / Mouse rusak': 'Low',
+    'Monitor bermasalah': 'Medium',
+    'Printer bermasalah': 'Medium',
+    'Scanner bermasalah': 'Medium',
+    'Laptop/Desktop lambat': 'Medium',
+    'Laptop/Desktop tidak menyala': 'High',
+    'Laptop/Desktop mati total saat operasional': 'Urgent',
+    'Lupa password': 'Low',
+    'Permintaan instal aplikasi': 'Low',
+    'Error aplikasi ringan': 'Medium',
+    'Tidak bisa login aplikasi': 'Medium',
+    'Aplikasi sering crash': 'High',
+    'Sistem utama tidak dapat digunakan': 'Urgent',
+    'Internet lambat': 'Medium',
+    'WiFi tidak tersambung': 'Medium',
+    'Tidak bisa akses folder sharing': 'High',
+    'Tidak bisa akses server': 'High',
+    'Jaringan satu ruangan mati': 'High',
+    'Jaringan satu divisi mati': 'Urgent',
+    'Internet kantor mati total': 'Urgent',
+    'Lainnya': 'Low',
+  };
+
+  static String _priorityForTicket(Ticket t) {
+    final desc = t.description.toLowerCase();
+    // Try to parse 'Sub-kategori: ...' from description
+    final subIndex = desc.indexOf('sub-kategori:');
+    if (subIndex >= 0) {
+      final after = desc.substring(subIndex + 'sub-kategori:'.length).trim();
+      final end = after.indexOf('|');
+      final sub = (end >= 0 ? after.substring(0, end) : after).trim();
+      if (sub.isNotEmpty) {
+        // match against keys
+        for (final entry in _defaultPriorityBySubCategory.entries) {
+          if (sub.contains(entry.key.toLowerCase()) ||
+              entry.key.toLowerCase().contains(sub)) {
+            return entry.value;
+          }
+        }
+      }
+    }
+
+    // Fallback: try matching known keywords in the description
+    for (final entry in _defaultPriorityBySubCategory.entries) {
+      if (desc.contains(entry.key.toLowerCase())) return entry.value;
+    }
+
+    // If nothing matched, return existing priority
+    return t.priority;
   }
 
   // ─── METHOD BARU: Notifications ───────────────────────────────────────────

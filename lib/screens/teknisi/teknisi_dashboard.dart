@@ -10,18 +10,6 @@ import 'teknisi_notifikasi_page.dart';
 import 'teknisi_profil_page.dart';
 import 'widgets/teknisi_ticket_detail_page.dart';
 
-class _AppColors {
-  static const primary = AppPalette.primary;
-  static const secondary = AppPalette.secondary;
-  static const tertiary = AppPalette.tertiary;
-  static const error = AppPalette.error;
-  static const onSurface = AppPalette.textOnSurface;
-  static const onSurfaceVariant = AppPalette.textOnSurfaceVariant;
-  static const background = AppPalette.backgroundAlt;
-  static const surfaceContainer = AppPalette.surfaceContainerLow;
-  static const outlineVariant = AppPalette.outlineVariant;
-}
-
 // ==================== DASHBOARD SHELL ====================
 class TeknisiDashboard extends StatefulWidget {
   final User user;
@@ -48,51 +36,40 @@ class _TeknisiDashboardState extends State<TeknisiDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _AppColors.background,
+      backgroundColor: AppPalette.background,
       body: _pages[_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 15,
-              color: Colors.black.withOpacity(0.05),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (index) => setState(() => _selectedIndex = index),
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          backgroundColor: Colors.white,
-          selectedItemColor: _AppColors.primary,
-          unselectedItemColor: Colors.grey.shade500,
-          selectedFontSize: 12,
-          unselectedFontSize: 11,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Beranda',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.confirmation_number_outlined),
-              activeIcon: Icon(Icons.confirmation_number),
-              label: 'Tiket',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_outlined),
-              activeIcon: Icon(Icons.notifications),
-              label: 'Notifikasi',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profil',
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        type: BottomNavigationBarType.fixed,
+        elevation: 4,
+        backgroundColor: AppPalette.surface,
+        selectedItemColor: AppPalette.primary,
+        unselectedItemColor: AppPalette.textSecondary,
+        selectedFontSize: 12,
+        unselectedFontSize: 11,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Beranda',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number_outlined),
+            activeIcon: Icon(Icons.confirmation_number),
+            label: 'Tiket',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications_outlined),
+            activeIcon: Icon(Icons.notifications),
+            label: 'Notifikasi',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Profil',
+          ),
+        ],
       ),
     );
   }
@@ -130,23 +107,28 @@ class _HomePageState extends State<_HomePage> {
     switch (priority.toLowerCase()) {
       case 'urgent':
       case 'kritis':
-        return _AppColors.error;
+        return AppPalette.error;
       case 'high':
       case 'tinggi':
-        return _AppColors.tertiary;
+        return AppPalette.tertiary;
       case 'medium':
       case 'sedang':
         return const Color(0xFFF59E0B);
       default:
-        return _AppColors.secondary;
+        return AppPalette.secondary;
     }
   }
 
   Color _statusColor(String status) {
-    if (status == 'Selesai') return Colors.green.shade700;
-    if (status == 'Dikerjakan') return Colors.orange.shade700;
-    if (status == 'Terbuka') return _AppColors.primary;
-    return _AppColors.onSurfaceVariant;
+    if (status == 'Selesai') return const Color(0xFF16A34A);
+    if (status == 'Dikerjakan') return const Color(0xFFF59E0B);
+    if (status == 'Terbuka') return AppPalette.primary;
+    return AppPalette.textSecondary;
+  }
+
+  Future<void> _onRefresh() async {
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (mounted) setState(() {});
   }
 
   @override
@@ -161,8 +143,9 @@ class _HomePageState extends State<_HomePage> {
 
         final totalToday = assignedTickets.length;
         final open = assignedTickets.where((t) => t.status == 'Terbuka').length;
-        final inProgress =
-            assignedTickets.where((t) => t.status == 'Dikerjakan').length;
+        final inProgress = assignedTickets
+            .where((t) => t.status == 'Dikerjakan')
+            .length;
         final overdue = assignedTickets
             .where((t) => t.priority == 'Urgent' || t.priority == 'Kritis')
             .length;
@@ -170,35 +153,20 @@ class _HomePageState extends State<_HomePage> {
         final notifCount = overdue;
 
         return Scaffold(
-          backgroundColor: _AppColors.background,
+          backgroundColor: AppPalette.background,
           appBar: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: AppPalette.primary,
+            foregroundColor: Colors.white,
             elevation: 0,
-            backgroundColor: Colors.white.withOpacity(0.95),
-            surfaceTintColor: Colors.transparent,
             titleSpacing: 16,
-            title: Row(
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: const Color(0xFFDDE1FF),
-                  child: Text(
-                    widget.userName[0],
-                    style: const TextStyle(
-                      color: _AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Dashboard Teknisi',
-                  style: TextStyle(
-                    color: _AppColors.primary,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
+            title: const Text(
+              'Dashboard Teknisi',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.normal,
+                fontSize: 20,
+              ),
             ),
             actions: [
               Stack(
@@ -208,7 +176,7 @@ class _HomePageState extends State<_HomePage> {
                     onPressed: () => widget.onNavigate(2),
                     icon: const Icon(
                       Icons.notifications_outlined,
-                      color: _AppColors.primary,
+                      color: Colors.white,
                     ),
                   ),
                   if (notifCount > 0)
@@ -218,8 +186,8 @@ class _HomePageState extends State<_HomePage> {
                       child: Container(
                         width: 16,
                         height: 16,
-                        decoration: const BoxDecoration(
-                          color: _AppColors.error,
+                        decoration: BoxDecoration(
+                          color: AppPalette.error,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -246,76 +214,214 @@ class _HomePageState extends State<_HomePage> {
                     );
                   }
                 },
-                icon: const Icon(Icons.logout, color: _AppColors.primary),
+                icon: const Icon(Icons.logout, color: Colors.white),
               ),
             ],
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── GREETING DINAMIS ──
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(_greetingEmoji, style: const TextStyle(fontSize: 22)),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '$_greeting, ${widget.userName.split(' ').first}!',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: _AppColors.onSurface,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Berikut ringkasan operasional Anda hari ini.',
-                  style: TextStyle(
-                    color: _AppColors.onSurfaceVariant,
-                    fontSize: 14,
-                  ),
-                ),
-
-                // ── BANNER URGENT ──
-                if (overdue > 0) ...[
-                  const SizedBox(height: 16),
+          body: RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: AppPalette.primary,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── GREETING / WELCOME CARD ──
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: _AppColors.error.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: _AppColors.error.withOpacity(0.3),
+                      gradient: AppPalette.heroGradient,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              _greetingEmoji,
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '$_greeting, ${widget.userName.split(' ').first}!',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Berikut ringkasan operasional Anda hari ini.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ── BANNER URGENT ──
+                  if (overdue > 0) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppPalette.error.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: AppPalette.error.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: AppPalette.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              '$overdue tiket Urgent/Kritis membutuhkan perhatian segera!',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppPalette.error,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => _TicketListPage(
+                                  title: 'Tiket Lewat Batas',
+                                  tickets: assignedTickets
+                                      .where(
+                                        (t) =>
+                                            t.priority == 'Urgent' ||
+                                            t.priority == 'Kritis',
+                                      )
+                                      .toList(),
+                                  accentColor: AppPalette.error,
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              'Lihat',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppPalette.error,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.warning_amber_rounded,
-                          color: _AppColors.error,
-                          size: 20,
+                    const SizedBox(height: 16),
+                  ],
+
+                  // ── RINGKASAN TIKET ──
+                  Text(
+                    'Ringkasan Tiket',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppPalette.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Ketuk kartu untuk melihat tiket',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppPalette.textSecondary.withValues(alpha: 0.7),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // ── SUMMARY GRID ──
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _DashboardCard(
+                          icon: Icons.assessment_outlined,
+                          value: totalToday.toString(),
+                          label: 'Total Hari Ini',
+                          subtitle: 'Semua tiket yang ditugaskan.',
+                          color: AppPalette.secondary,
+                          onTap: () => widget.onNavigate(1),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            '$overdue tiket Urgent/Kritis membutuhkan perhatian segera!',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: _AppColors.error,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _DashboardCard(
+                          icon: Icons.lock_open,
+                          value: open.toString(),
+                          label: 'Terbuka',
+                          subtitle: 'Belum mulai dikerjakan.',
+                          color: const Color(0xFFF59E0B),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => _TicketListPage(
+                                title: 'Tiket Terbuka',
+                                tickets: assignedTickets
+                                    .where((t) => t.status == 'Terbuka')
+                                    .toList(),
+                              ),
                             ),
                           ),
                         ),
-                        GestureDetector(
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _DashboardCard(
+                          icon: Icons.engineering,
+                          value: inProgress.toString(),
+                          label: 'Dikerjakan',
+                          subtitle: 'Sedang diproses teknisi.',
+                          color: AppPalette.secondary,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => _TicketListPage(
+                                title: 'Tiket Dikerjakan',
+                                tickets: assignedTickets
+                                    .where((t) => t.status == 'Dikerjakan')
+                                    .toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _DashboardCard(
+                          icon: Icons.warning_amber_outlined,
+                          value: overdue.toString(),
+                          label: 'Lewat Batas',
+                          subtitle: 'Prioritas Urgent/Kritis.',
+                          color: AppPalette.error,
+                          isError: true,
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -328,527 +434,289 @@ class _HomePageState extends State<_HomePage> {
                                           t.priority == 'Kritis',
                                     )
                                     .toList(),
-                                accentColor: _AppColors.error,
+                                accentColor: AppPalette.error,
                               ),
                             ),
                           ),
-                          child: const Text(
-                            'Lihat',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: _AppColors.error,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: 20),
-
-                // ── LABEL SECTION ──
-                const Text(
-                  'Ringkasan Tiket',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: _AppColors.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // ── SUMMARY GRID ──
-                GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  childAspectRatio: 1.45,
-                  children: [
-                    _DashboardCard(
-                      icon: Icons.assessment_outlined,
-                      value: totalToday.toString(),
-                      label: 'Total Hari Ini',
-                      description:
-                          'Semua tiket yang sudah ditugaskan kepada Anda.',
-                      color: _AppColors.primary,
-                      onTap: () => widget.onNavigate(1),
-                    ),
-                    _DashboardCard(
-                      icon: Icons.pending_outlined,
-                      value: open.toString(),
-                      label: 'Terbuka',
-                      description: 'Tiket baru yang belum mulai dikerjakan.',
-                      color: _AppColors.secondary,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => _TicketListPage(
-                            title: 'Tiket Terbuka',
-                            tickets: assignedTickets
-                                .where((t) => t.status == 'Terbuka')
-                                .toList(),
-                          ),
                         ),
                       ),
-                    ),
-                    _DashboardCard(
-                      icon: Icons.sync,
-                      value: inProgress.toString(),
-                      label: 'Sedang Dikerjakan',
-                      description:
-                          'Tiket yang sedang dalam proses penanganan.',
-                      color: Colors.indigo,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => _TicketListPage(
-                            title: 'Tiket Dikerjakan',
-                            tickets: assignedTickets
-                                .where((t) => t.status == 'Dikerjakan')
-                                .toList(),
-                          ),
-                        ),
-                      ),
-                    ),
-                    _DashboardCard(
-                      icon: Icons.warning_amber_outlined,
-                      value: overdue.toString(),
-                      label: 'Lewat Batas',
-                      description:
-                          'Tiket prioritas Urgent/Kritis yang membutuhkan perhatian segera.',
-                      color: _AppColors.error,
-                      isError: true,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => _TicketListPage(
-                            title: 'Tiket Lewat Batas',
-                            tickets: assignedTickets
-                                .where(
-                                  (t) =>
-                                      t.priority == 'Urgent' ||
-                                      t.priority == 'Kritis',
-                                )
-                                .toList(),
-                            accentColor: _AppColors.error,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // ── SLA CARD ──
-                GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const _SlaDetailPage()),
+                    ],
                   ),
-                  child: Container(
+                  const SizedBox(height: 24),
+
+                  // ── ACTIVE QUEUE CARD ──
+                  Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
+                      color: AppPalette.surface,
+                      borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          blurRadius: 12,
-                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                          color: Colors.grey.withValues(alpha: 0.1),
                         ),
                       ],
                     ),
-                    child: Row(
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Performa SLA',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: _AppColors.onSurface,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _AppColors.primary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                child: const Text(
-                                  'Target: 98%',
-                                  style: TextStyle(
-                                    color: _AppColors.primary,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                              const Text(
-                                'Waktu respons Anda masuk dalam 5% terbaik tim.',
-                                style: TextStyle(
-                                  color: _AppColors.onSurfaceVariant,
-                                  height: 1.5,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              const Row(
-                                children: [
-                                  Text(
-                                    'Lihat Detail',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: _AppColors.primary,
-                                    ),
-                                  ),
-                                  SizedBox(width: 4),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    size: 14,
-                                    color: _AppColors.primary,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        SizedBox(
-                          width: 100,
-                          height: 100,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              SizedBox(
-                                width: 100,
-                                height: 100,
-                                child: CircularProgressIndicator(
-                                  value: 0.95,
-                                  strokeWidth: 10,
-                                  backgroundColor: _AppColors.surfaceContainer,
-                                  color: _AppColors.primary,
-                                ),
-                              ),
-                              const Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    '95%',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: _AppColors.primary,
-                                    ),
-                                  ),
-                                  Text(
-                                    'SLA',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: _AppColors.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // ── ACTIVE QUEUE CARD ──
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        blurRadius: 12,
-                        color: Colors.black.withOpacity(0.05),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: _AppColors.secondary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: const Icon(
-                              Icons.queue,
-                              color: _AppColors.secondary,
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Antrian Aktif',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Tiket belum diassign menunggu review',
-                                  style: TextStyle(
-                                    color: _AppColors.onSurfaceVariant,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            open.toString(),
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: _AppColors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 18),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: _AppColors.surfaceContainer,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: _AppColors.primary,
-                              size: 18,
-                            ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Tiket sedang menunggu penugasan teknisi.',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: _AppColors.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => widget.onNavigate(1),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _AppColors.primary,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Buka Antrian',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Icon(Icons.arrow_forward),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // ── RECENT ACTIVITY ──
-                if (assignedTickets.isNotEmpty) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Aktivitas Terbaru',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: _AppColors.onSurface,
-                        ),
-                      ),
-                      if (assignedTickets.length > 3)
-                        GestureDetector(
-                          onTap: () => widget.onNavigate(1),
-                          child: const Text(
-                            'Lihat semua',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: _AppColors.primary,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  ...assignedTickets.take(3).map((ticket) {
-                    final color = _priorityColor(ticket.priority);
-                    final statusColor = _statusColor(ticket.status);
-
-                    return GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              TeknisiTicketDetailPage(ticket: ticket),
-                        ),
-                      ),
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border:
-                              Border(left: BorderSide(color: color, width: 4)),
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 8,
-                              color: Colors.black.withOpacity(0.04),
-                            ),
-                          ],
-                        ),
-                        child: Row(
+                        Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: color.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(10),
+                                color: AppPalette.secondary.withValues(
+                                  alpha: 0.15,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Icon(
-                                ticket.priority == 'Urgent' ||
-                                        ticket.priority == 'Kritis'
-                                    ? Icons.warning_amber_rounded
-                                    : Icons.confirmation_number_outlined,
-                                color: color,
-                                size: 16,
+                                Icons.queue,
+                                color: AppPalette.secondary,
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 14),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    ticket.title,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: _AppColors.onSurface,
+                                    'Antrian Aktif',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppPalette.textPrimary,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.person_outline,
-                                        size: 11,
-                                        color: _AppColors.onSurfaceVariant,
-                                      ),
-                                      const SizedBox(width: 3),
-                                      Text(
-                                        ticket.reporter,
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: _AppColors.onSurfaceVariant,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Icon(
-                                        Icons.calendar_today_outlined,
-                                        size: 11,
-                                        color: _AppColors.onSurfaceVariant,
-                                      ),
-                                      const SizedBox(width: 3),
-                                      Text(
-                                        ticket.date,
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: _AppColors.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ],
+                                  Text(
+                                    'Tiket menunggu penugasan',
+                                    style: TextStyle(
+                                      color: AppPalette.textSecondary,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(99),
-                              ),
-                              child: Text(
-                                ticket.status,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: statusColor,
-                                ),
+                            Text(
+                              open.toString(),
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: AppPalette.primary,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  }),
-                ],
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppPalette.background,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: AppPalette.primary,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Tiket sedang menunggu penugasan teknisi.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppPalette.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () => widget.onNavigate(1),
+                            icon: const Icon(Icons.arrow_forward),
+                            label: const Text('Buka Antrian'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppPalette.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              textStyle: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
-                const SizedBox(height: 20),
-              ],
+                  // ── RECENT ACTIVITY ──
+                  if (assignedTickets.isNotEmpty) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Aktivitas Terbaru',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppPalette.textPrimary,
+                          ),
+                        ),
+                        if (assignedTickets.length > 3)
+                          TextButton(
+                            onPressed: () => widget.onNavigate(1),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppPalette.primary,
+                              textStyle: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                            child: const Text('Lihat Semua →'),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    ...assignedTickets.take(3).map((ticket) {
+                      final color = _priorityColor(ticket.priority);
+                      final statusColor = _statusColor(ticket.status);
+
+                      return GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                TeknisiTicketDetailPage(ticket: ticket),
+                          ),
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: AppPalette.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border(
+                              left: BorderSide(color: color, width: 4),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 5,
+                                spreadRadius: 1,
+                                color: Colors.grey.withValues(alpha: 0.05),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: color.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  ticket.priority == 'Urgent' ||
+                                          ticket.priority == 'Kritis'
+                                      ? Icons.warning_amber_rounded
+                                      : Icons.confirmation_number_outlined,
+                                  color: color,
+                                  size: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      ticket.title,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppPalette.textPrimary,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.person_outline,
+                                          size: 11,
+                                          color: AppPalette.textSecondary,
+                                        ),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          ticket.reporter,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: AppPalette.textSecondary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          Icons.calendar_today_outlined,
+                                          size: 11,
+                                          color: AppPalette.textSecondary,
+                                        ),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          ticket.date,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: AppPalette.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(99),
+                                ),
+                                child: Text(
+                                  ticket.status,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: statusColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         );
@@ -864,7 +732,7 @@ class _DashboardCard extends StatelessWidget {
   final IconData icon;
   final String value;
   final String label;
-  final String description;
+  final String subtitle;
   final Color color;
   final bool isError;
   final VoidCallback onTap;
@@ -873,7 +741,7 @@ class _DashboardCard extends StatelessWidget {
     required this.icon,
     required this.value,
     required this.label,
-    required this.description,
+    required this.subtitle,
     required this.color,
     required this.onTap,
     this.isError = false,
@@ -881,20 +749,19 @@ class _DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isError ? const Color(0xFFFFDAD6) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: _AppColors.outlineVariant.withOpacity(0.4),
-          ),
+          color: isError ? const Color(0xFFFFEDED) : AppPalette.surface,
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               blurRadius: 10,
-              color: Colors.black.withOpacity(0.04),
+              spreadRadius: 2,
+              color: Colors.grey.withValues(alpha: 0.1),
             ),
           ],
         ),
@@ -902,47 +769,54 @@ class _DashboardCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isError
+                        ? AppPalette.error
+                        : AppPalette.textSecondary,
+                  ),
+                ),
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, size: 16, color: color),
-                ),
-                const Spacer(),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                    height: 1,
-                  ),
+                  child: Icon(icon, size: 18, color: color),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              label,
+              value,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: isError ? _AppColors.error : _AppColors.onSurface,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: color,
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              description,
-              style: const TextStyle(
-                fontSize: 11,
-                color: _AppColors.onSurfaceVariant,
-                height: 1.4,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppPalette.textSecondary,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 10,
+                  color: AppPalette.textSecondary.withValues(alpha: 0.5),
+                ),
+              ],
             ),
           ],
         ),
@@ -962,42 +836,42 @@ class _TicketListPage extends StatelessWidget {
   const _TicketListPage({
     required this.title,
     required this.tickets,
-    this.accentColor = _AppColors.primary,
-  });
+    Color? accentColor,
+  }) : accentColor = accentColor ?? AppPalette.primary;
 
   Color _priorityColor(String p) {
     switch (p.toLowerCase()) {
       case 'urgent':
       case 'kritis':
-        return _AppColors.error;
+        return AppPalette.error;
       case 'high':
       case 'tinggi':
-        return _AppColors.tertiary;
+        return AppPalette.tertiary;
       case 'medium':
       case 'sedang':
         return const Color(0xFFF59E0B);
       default:
-        return _AppColors.onSurfaceVariant;
+        return AppPalette.textSecondary;
     }
   }
 
   Color _statusColor(String s) {
-    if (s == 'Selesai') return Colors.green.shade700;
-    if (s == 'Dikerjakan') return Colors.orange.shade700;
-    if (s == 'Terbuka') return _AppColors.primary;
-    return _AppColors.onSurfaceVariant;
+    if (s == 'Selesai') return const Color(0xFF16A34A);
+    if (s == 'Dikerjakan') return const Color(0xFFF59E0B);
+    if (s == 'Terbuka') return AppPalette.primary;
+    return AppPalette.textSecondary;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _AppColors.background,
+      backgroundColor: AppPalette.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: AppPalette.primary,
+        foregroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _AppColors.primary),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -1008,24 +882,17 @@ class _TicketListPage extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: _AppColors.onSurface,
+                color: Colors.white,
               ),
             ),
             Text(
               '${tickets.length} tiket',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: _AppColors.onSurfaceVariant,
+                color: Colors.white.withValues(alpha: 0.8),
               ),
             ),
           ],
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            color: _AppColors.outlineVariant.withOpacity(0.4),
-          ),
         ),
       ),
       body: tickets.isEmpty
@@ -1036,14 +903,14 @@ class _TicketListPage extends StatelessWidget {
                   Icon(
                     Icons.inbox_outlined,
                     size: 64,
-                    color: _AppColors.onSurfaceVariant.withOpacity(0.3),
+                    color: AppPalette.textSecondary.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Tidak ada tiket',
                     style: TextStyle(
                       fontSize: 16,
-                      color: _AppColors.onSurfaceVariant,
+                      color: AppPalette.textSecondary,
                     ),
                   ),
                 ],
@@ -1064,7 +931,7 @@ class _TicketListPage extends StatelessWidget {
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppPalette.surface,
                       borderRadius: BorderRadius.circular(14),
                       border: Border(
                         left: BorderSide(
@@ -1074,9 +941,9 @@ class _TicketListPage extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                          color: Colors.grey.withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          spreadRadius: 2,
                         ),
                       ],
                     ),
@@ -1096,7 +963,7 @@ class _TicketListPage extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: _priorityColor(
                                     ticket.priority,
-                                  ).withOpacity(0.08),
+                                  ).withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(99),
                                 ),
                                 child: Row(
@@ -1104,8 +971,9 @@ class _TicketListPage extends StatelessWidget {
                                   children: [
                                     CircleAvatar(
                                       radius: 3,
-                                      backgroundColor:
-                                          _priorityColor(ticket.priority),
+                                      backgroundColor: _priorityColor(
+                                        ticket.priority,
+                                      ),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -1127,7 +995,7 @@ class _TicketListPage extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: _statusColor(
                                     ticket.status,
-                                  ).withOpacity(0.1),
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(99),
                                 ),
                                 child: Text(
@@ -1144,47 +1012,47 @@ class _TicketListPage extends StatelessWidget {
                           const SizedBox(height: 8),
                           Text(
                             ticket.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: _AppColors.onSurface,
+                              color: AppPalette.textPrimary,
                               height: 1.3,
                             ),
                           ),
                           const SizedBox(height: 6),
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.person_outline,
                                 size: 13,
-                                color: _AppColors.onSurfaceVariant,
+                                color: AppPalette.textSecondary,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 ticket.reporter,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
-                                  color: _AppColors.onSurfaceVariant,
+                                  color: AppPalette.textSecondary,
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              const Icon(
+                              Icon(
                                 Icons.calendar_today_outlined,
                                 size: 13,
-                                color: _AppColors.onSurfaceVariant,
+                                color: AppPalette.textSecondary,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 ticket.date,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
-                                  color: _AppColors.onSurfaceVariant,
+                                  color: AppPalette.textSecondary,
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 10),
-                          const Row(
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(
@@ -1192,14 +1060,14 @@ class _TicketListPage extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: _AppColors.primary,
+                                  color: AppPalette.primary,
                                 ),
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4),
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 11,
-                                color: _AppColors.primary,
+                                color: AppPalette.primary,
                               ),
                             ],
                           ),
@@ -1256,13 +1124,13 @@ class _SlaDetailPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: _AppColors.background,
+      backgroundColor: AppPalette.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: AppPalette.primary,
+        foregroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _AppColors.primary),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -1270,14 +1138,7 @@ class _SlaDetailPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: _AppColors.onSurface,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            color: _AppColors.outlineVariant.withOpacity(0.4),
+            color: Colors.white,
           ),
         ),
       ),
@@ -1285,13 +1146,13 @@ class _SlaDetailPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Score Card
+            // Score Card – pakai heroGradient
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: _AppColors.primary,
-                borderRadius: BorderRadius.circular(20),
+                gradient: AppPalette.heroGradient,
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
                 children: [
@@ -1309,7 +1170,7 @@ class _SlaDetailPage extends StatelessWidget {
                         child: CircularProgressIndicator(
                           value: 0.95,
                           strokeWidth: 12,
-                          backgroundColor: Colors.white.withOpacity(0.2),
+                          backgroundColor: Colors.white.withValues(alpha: 0.2),
                           color: Colors.white,
                         ),
                       ),
@@ -1342,7 +1203,7 @@ class _SlaDetailPage extends StatelessWidget {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(99),
                     ),
                     child: const Text(
@@ -1363,12 +1224,13 @@ class _SlaDetailPage extends StatelessWidget {
             // Metrics list
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppPalette.surface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    blurRadius: 8,
-                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                    color: Colors.grey.withValues(alpha: 0.1),
                   ),
                 ],
               ),
@@ -1389,18 +1251,18 @@ class _SlaDetailPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     m.label,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
-                                      color: _AppColors.onSurface,
+                                      color: AppPalette.textPrimary,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     'Target: ${m.target}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
-                                      color: _AppColors.onSurfaceVariant,
+                                      color: AppPalette.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -1413,8 +1275,10 @@ class _SlaDetailPage extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: m.isGood
-                                    ? Colors.green.shade50
-                                    : _AppColors.error.withOpacity(0.08),
+                                    ? const Color(
+                                        0xFF16A34A,
+                                      ).withValues(alpha: 0.1)
+                                    : AppPalette.error.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(99),
                               ),
                               child: Text(
@@ -1423,8 +1287,8 @@ class _SlaDetailPage extends StatelessWidget {
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   color: m.isGood
-                                      ? Colors.green.shade700
-                                      : _AppColors.error,
+                                      ? const Color(0xFF16A34A)
+                                      : AppPalette.error,
                                 ),
                               ),
                             ),
@@ -1432,9 +1296,9 @@ class _SlaDetailPage extends StatelessWidget {
                         ),
                       ),
                       if (!isLast)
-                        const Divider(
+                        Divider(
                           height: 1,
-                          color: _AppColors.outlineVariant,
+                          color: Colors.grey.withValues(alpha: 0.1),
                         ),
                     ],
                   );
@@ -1474,6 +1338,7 @@ class _SlaDetailPage extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
