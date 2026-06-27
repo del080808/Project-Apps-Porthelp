@@ -322,8 +322,8 @@ class _TeknisiTicketDetailPageState extends State<TeknisiTicketDetailPage> {
               'Detail Tiket',
               style: TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
+                fontWeight: FontWeight.normal,
+                fontSize: 20,
               ),
             ),
           ),

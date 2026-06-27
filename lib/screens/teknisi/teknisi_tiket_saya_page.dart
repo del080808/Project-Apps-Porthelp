@@ -96,7 +96,8 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
 
   List<Ticket> _applyFilters(List<Ticket> list) {
     var filtered = list.where((t) {
-      final matchSearch = _searchQuery.isEmpty ||
+      final matchSearch =
+          _searchQuery.isEmpty ||
           t.title.toLowerCase().contains(_searchQuery) ||
           t.reporter.toLowerCase().contains(_searchQuery) ||
           t.id.toLowerCase().contains(_searchQuery) ||
@@ -105,8 +106,7 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
           t.status.toLowerCase().contains(_searchQuery) ||
           t.priority.toLowerCase().contains(_searchQuery) ||
           _getTicketCategory(t).toLowerCase().contains(_searchQuery);
-      final matchStatus =
-          _filterStatus == 'Semua' || t.status == _filterStatus;
+      final matchStatus = _filterStatus == 'Semua' || t.status == _filterStatus;
       final matchPriority =
           _filterPriority == 'Semua' || t.priority == _filterPriority;
       final matchCategory = _matchesCategory(t);
@@ -149,8 +149,9 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
       builder: (context, _) {
         final allTickets = DataService.getTeknisiSampleTickets();
 
-        final unassignedCount =
-            allTickets.where((t) => t.assignedTo == null).length;
+        final unassignedCount = allTickets
+            .where((t) => t.assignedTo == null)
+            .length;
         final highPrioCount = allTickets
             .where(
               (t) =>
@@ -160,57 +161,35 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
                   t.priority.toLowerCase() == 'tinggi',
             )
             .length;
-        final inProgressCount =
-            allTickets.where((t) => t.status == 'Dikerjakan').length;
+        final inProgressCount = allTickets
+            .where((t) => t.status == 'Dikerjakan')
+            .length;
 
         return Scaffold(
           backgroundColor: _AppColors.background,
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            backgroundColor: Colors.white,
-            surfaceTintColor: Colors.transparent,
+            backgroundColor: _AppColors.primary,
             elevation: 0,
             titleSpacing: 16,
-            title: Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: const Color(0xFF1E40AF),
-                  child: const Icon(
-                    Icons.support_agent,
-                    size: 18,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  'IT Helpdesk',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 20,
-                    letterSpacing: -0.5,
-                    color: Color(0xFF00288E),
-                  ),
-                ),
-              ],
+            title: const Text(
+              'Daftar Tiket',
+              style: TextStyle(
+                fontWeight: FontWeight.normal,
+                fontSize: 20,
+                color: Colors.white,
+              ),
             ),
             actions: [
               IconButton(
                 icon: const Icon(
                   Icons.notifications_outlined,
-                  color: _AppColors.primary,
+                  color: Colors.white,
                 ),
                 onPressed: () {},
               ),
               const SizedBox(width: 4),
             ],
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child: Container(
-                height: 1,
-                color: _AppColors.outlineVariant.withOpacity(0.4),
-              ),
-            ),
           ),
           body: CustomScrollView(
             slivers: [
@@ -226,8 +205,7 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: _AppColors.outlineVariant),
+                          border: Border.all(color: _AppColors.outlineVariant),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.05),
@@ -239,8 +217,7 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
                         child: TextField(
                           controller: _searchController,
                           decoration: const InputDecoration(
-                            hintText:
-                                'Search tickets, IDs, or employees...',
+                            hintText: 'Search tickets, IDs, or employees...',
                             hintStyle: TextStyle(
                               color: _AppColors.outline,
                               fontSize: 14,
@@ -265,29 +242,23 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
                       height: 88,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         children: [
                           _StatCard(
                             label: 'Unassigned',
-                            value: unassignedCount
-                                .toString()
-                                .padLeft(2, '0'),
+                            value: unassignedCount.toString().padLeft(2, '0'),
                             valueColor: _AppColors.primary,
                           ),
                           const SizedBox(width: 10),
                           _StatCard(
                             label: 'High Priority',
-                            value:
-                                highPrioCount.toString().padLeft(2, '0'),
+                            value: highPrioCount.toString().padLeft(2, '0'),
                             valueColor: _AppColors.error,
                           ),
                           const SizedBox(width: 10),
                           _StatCard(
                             label: 'In Progress',
-                            value: inProgressCount
-                                .toString()
-                                .padLeft(2, '0'),
+                            value: inProgressCount.toString().padLeft(2, '0'),
                             valueColor: _AppColors.secondary,
                           ),
                         ],
@@ -296,8 +267,7 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
                     const SizedBox(height: 16),
                     // Queue Filters Header
                     Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -336,8 +306,7 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
                     const SizedBox(height: 10),
                     // Filter Dropdowns 2x2
                     Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
                         children: [
                           Row(
@@ -352,9 +321,8 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
                                     'Dikerjakan',
                                     'Selesai',
                                   ],
-                                  onChanged: (v) => setState(
-                                    () => _filterStatus = v!,
-                                  ),
+                                  onChanged: (v) =>
+                                      setState(() => _filterStatus = v!),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -368,9 +336,8 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
                                     'High',
                                     'Medium',
                                   ],
-                                  onChanged: (v) => setState(
-                                    () => _filterPriority = v!,
-                                  ),
+                                  onChanged: (v) =>
+                                      setState(() => _filterPriority = v!),
                                 ),
                               ),
                             ],
@@ -390,9 +357,8 @@ class _TeknisiTiketSayaPageState extends State<TeknisiTiketSayaPage> {
                                     'Akses & IAM',
                                     'Infrastruktur',
                                   ],
-                                  onChanged: (v) => setState(
-                                    () => _filterCategory = v!,
-                                  ),
+                                  onChanged: (v) =>
+                                      setState(() => _filterCategory = v!),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -527,9 +493,7 @@ class _StatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: _AppColors.outlineVariant.withOpacity(0.3),
-        ),
+        border: Border.all(color: _AppColors.outlineVariant.withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -604,10 +568,8 @@ class _FilterDropdown extends StatelessWidget {
           ),
           items: items
               .map(
-                (item) => DropdownMenuItem(
-                  value: item,
-                  child: Text('$label: $item'),
-                ),
+                (item) =>
+                    DropdownMenuItem(value: item, child: Text('$label: $item')),
               )
               .toList(),
           onChanged: onChanged,

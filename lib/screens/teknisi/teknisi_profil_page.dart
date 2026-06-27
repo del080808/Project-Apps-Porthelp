@@ -404,7 +404,7 @@ class _TeknisiProfilPageState extends State<TeknisiProfilPage> {
                     _buildSettingsTile(
                       icon: Icons.edit_outlined,
                       iconColor: const Color(0xFF1A237E),
-                      bgColor: const Color(0xFF1A237E).withOpacity(0.8),
+                      bgColor: Color.fromARGB(255, 209, 230, 252).withOpacity(0.8),
                       title: 'Edit Profil',
                       subtitle: 'Ubah informasi akun Anda',
                       onTap: () => setState(() => _isEditing = true),

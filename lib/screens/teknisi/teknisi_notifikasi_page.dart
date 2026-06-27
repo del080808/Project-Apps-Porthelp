@@ -149,7 +149,7 @@ class _TeknisiNotifikasiPageState extends State<TeknisiNotifikasiPage> {
             elevation: 0,
             title: const Text(
               'Notifikasi',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal),
             ),
             centerTitle: true,
           ),
